@@ -74,10 +74,12 @@ def get_courses(url, token):
         # 保存课程列表
         with open('./courses/course_list.json', 'w') as f:
             json.dump(data_to_save, f, indent=4)
+        print('课程列表已保存到' + './courses/course_list.json')
         return course_list
 
 
 def get_chapters(url, token, course_id):
+    print('正在获取course'+course_id+'章节列表...')
     headers = {
         'Authorization': 'Bearer ' + token
     }
@@ -91,8 +93,16 @@ def get_chapters(url, token, course_id):
         # 保存章节列表
         with open('./chapters/course'+course_id+'_chapter_list.json', 'w') as f:
             json.dump(data_to_save, f, indent=4)
+        print('章节列表已保存到' + './chapters/course'+course_id+'_chapter_list.json')
         return chapter_list
 
+
+def print_chapter_list(chapter_list):
+    for chapter in chapter_list:
+        if is_complete == 0:
+            print('章节ID：', chapter.get('auto_id'), '章节名称：', chapter.get('chapter_name'), '未完成')
+        else:
+            print('章节ID：', chapter.get('auto_id'), '章节名称：', chapter.get('chapter_name'), '已完成')
 
 # 登录
 print('正在登录...')
@@ -114,25 +124,23 @@ else:
 # 输出课程列表
 for course in course_list:
     print('课程ID：', course.get('auto_id'), '课程名称：', course.get('course_name'))
+    #获取章节列表
+    get_chapters(chaptersUrl, Token, str(course.get('auto_id')))
 # 用户操作
 option = -1
+uncompleted_chapter_list = []
+to_complete_chapter_list = []
 while option != 0:
     # 输入1获取课程列表，输入2以及课程ID获取章节列表，输入3以及章节ID获取习题列表，输入4以及章节ID获取答案，输入0退出
-    print('1.获取课程列表 2.获取章节列表 3.获取习题列表 4.获取答案 0.退出')
+    print('1.获取课程列表 2.获取章节列表 3.获取习题列表 4.获取答案 5.批量完成章节 0.退出')
     option = int(input('请输入操作编号：'))
     if option == 1:
         for course in course_list:
             print('课程ID：', course.get('auto_id'), '课程名称：', course.get('course_name'))
     elif option == 2:
         courseId = input('请输入课程ID：')
-        if os.path.exists('./chapters/course'+courseId+'_chapter_list.json'):
-            with open('./chapters/course'+courseId+'_chapter_list.json', 'r') as f:
-                data = json.load(f)
-                chapter_list = data.get('chapters', [])
-        else:
-            chapter_list = get_chapters(chaptersUrl, Token, courseId)
-        for chapter in chapter_list:
-            print('章节ID：', chapter.get('auto_id'), '章节名称：', chapter.get('chapter_name'))
+        chapter_list = get_chapters(chaptersUrl, Token, courseId)
+        print_chapter_list(chapter_list)
     elif option == 3:
         chapterId = input('请输入章节ID：')
         if os.path.exists('./exercises/chapter' + chapterId + '_exercise_list.json'):
@@ -172,7 +180,31 @@ while option != 0:
                 if exercise.get('auto_id') == answer.get('question_id'):
                     print('题目：', exercise.get('question_answer_info'))
             print('答案：', answer.get('student_option'))
+    elif option == 5:
+        courseId = input('请输入课程ID：')
+        chapter_list = get_chapters(chaptersUrl, Token, courseId)
 
+        print('总共有', len(uncompleted_chapter_list), '个未完成的章节')
+        to_complete_chapter_list = input('请输入要完成的章节ID，以逗号分隔：').split(',')
+        print('uncompleted_chapter_list:', uncompleted_chapter_list)
+        print('to_complete_chapter_list:', to_complete_chapter_list)
+        for chapterId in to_complete_chapter_list:
+            if chapterId in uncompleted_chapter_list:
+                print('开始完成章节'+chapterId+'...')
+                exercise_list = get_exercise_list(exercisesUrl + chapterId, Token, chapterId)
+                answers = get_answers(submitAnswerUrl, Token, exercise_list, chapterId)
+                print('章节'+chapterId+'答案')
+                for answer in answers:
+                    # 横向输出
+                    print(answer.get('student_option'), end=' ')
+                print('')
+                print('章节'+chapterId+'已完成')
+            else:
+                print('章节'+chapterId+'已完成或不存在')
+        print_chapter_list(chapter_list)
+    #数据清零
+    uncompleted_chapter_list = []
+    to_complete_chapter_list = []
 
 
 # 发送POST请求

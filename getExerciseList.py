@@ -3,6 +3,7 @@ import json
 
 
 def get_exercise_list(url, token,chapterId):
+    print('正在获取chapter'+chapterId+'习题列表...')
     headers = {
         'Authorization': 'Bearer ' + token  # 假设token类型是Bearer，根据实际情况调整
     }

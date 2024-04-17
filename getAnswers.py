@@ -48,6 +48,7 @@ def get_answers(url, token, exercise_list, chapterId):
     right_answers = []
     not_right_answers = []
     not_right_answers_num = 0
+    submint_num = 1
     # 初始化答案
     for exercise in exercises:
         right_answers.append({
@@ -83,6 +84,8 @@ def get_answers(url, token, exercise_list, chapterId):
         })
     print('form_data:', form_data)
     response = http.request('POST', url, headers=headers, body=json.dumps(form_data))
+    print('第'+str(submint_num)+'次提交')
+    submint_num += 1
     if response.status == 200:
         res = json.loads(response.data.decode('utf-8'))
         data = res.get('data')
@@ -127,6 +130,8 @@ def get_answers(url, token, exercise_list, chapterId):
                     'student_option': right_answers[i].get('student_option')
                 })
         response = http.request('POST', url, headers=headers, body=json.dumps(form_data))
+        print('第'+str(submint_num)+'次提交')
+        submint_num += 1
         if response.status == 200:
             res = json.loads(response.data.decode('utf-8'))
             data = res.get('data')
