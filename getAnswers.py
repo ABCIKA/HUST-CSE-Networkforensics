@@ -1,5 +1,6 @@
 import urllib3
 import json
+import time
 
 
 def generate_combinations(options, current_combination=[], index=0):
@@ -97,6 +98,8 @@ def get_answers(url, token, exercise_list, chapterId):
                             not_right_answers_num -= 1
                             print('right_answers_id', right_answers[i].get('question_id'))
                             print('not_right_answers_num', not_right_answers_num)
+    # 延迟5秒
+    time.sleep(5)
     # 穷举答案
     while not_right_answers_num > 0:
         form_data = {
@@ -139,5 +142,7 @@ def get_answers(url, token, exercise_list, chapterId):
                                 not_right_answers_num -= 1
                                 print('right_answers_id', right_answers[i].get('question_id'))
                                 print('not_right_answers_num', not_right_answers_num)
+        # 延迟5秒
+        time.sleep(5)
 
     return right_answers

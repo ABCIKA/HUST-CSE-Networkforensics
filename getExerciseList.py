@@ -17,7 +17,7 @@ def get_exercise_list(url, token,chapterId):
             data_to_save = {"exercises": exercise_list}
             with open('./exercises/chapter'+chapterId+'_exercise_list.json', 'w') as f:
                 json.dump(data_to_save, f, indent=4)
-            print("习题列表已保存到 exercise_list.json 文件中。")
+            print("习题列表已保存到"+'./exercises/chapter'+chapterId+'_exercise_list.json')
         else:
             print("未找到习题列表数据。")
     else:
